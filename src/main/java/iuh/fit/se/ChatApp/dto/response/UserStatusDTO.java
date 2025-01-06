@@ -1,25 +1,23 @@
 package iuh.fit.se.ChatApp.dto.response;
 
-import iuh.fit.se.ChatApp.entity.User;
 import iuh.fit.se.ChatApp.utils.DateUtils;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Date;
 
 @Data
 @Builder
-public class UserDTO {
+public class UserStatusDTO extends UserDTO {
     private String id;
     private String name;
     private String username;
-    private DateUtils.DateObject dateOfBirth;
+    private Date dateOfBirth;
     private Boolean gender;
     private String avatar;
     private String avatarColor;
     private String coverImage;
-    private Boolean isAdmin;
-    private Boolean isActived;
-    private Boolean isDeleted;
-    private List<User.PhoneBook> phoneBooks;
+    private String status;
+    private Long numberCommonGroup;
+    private Integer numberCommonFriend;
 }
