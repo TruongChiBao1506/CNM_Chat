@@ -33,12 +33,6 @@ public interface UserService {
 
     UserStatusDTO getStatusFriendOfUserById(String id, String searchUserId);
 
-    long getNumberCommonGroup(String myId, String searchUserId);
-
-    int getNumberCommonFriend(String myId, String searchUserId);
-
-    String getFriendStatus(String myId, String searchUserId);
-
     Page<UserDTO> getList(String username, int page, int size);
 
     void updateActived(String userId, boolean status);
