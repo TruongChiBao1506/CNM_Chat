@@ -13,7 +13,7 @@ public class Message {
     private String id;
 
     private String userId;
-    private List<String> manipulatedUserIds;
+    private List<String> manipulatedUserIds; // // Danh sách người dùng đã thao tác với tin nhắn
     private String content;
     private List<String> tags;
     private String replyMessageId;
