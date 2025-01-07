@@ -16,8 +16,8 @@ public class Conversation {
     private String leaderId;
     private List<String> managerIds;
     private String lastMessageId;
-    private List<String> pinMessageIds;
+    private List<String> pinMessageIds; // danh sách id của các tin nhắn được ghim
     private List<String> members;
-    private Boolean isJoinFromLink = true;
-    private Boolean type;
+    private Boolean isJoinFromLink = true; // Xác định xem người dùng có thể tham gia bằng liên kết không.
+    private Boolean type; // true: nhóm, false: cá nhân
 }
