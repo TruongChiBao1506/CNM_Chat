@@ -15,7 +15,7 @@ class ClassifyService {
     const colors = await Color.find({});
     const index = commonUtils.getRandomInt(0, colors.length - 1);
 
-    return colors[index].code;
+    return colors[index]?.code;
   }
 
   /**

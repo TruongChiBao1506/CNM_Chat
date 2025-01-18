@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const routes = require("./routes");
 const db = require("./config/database");
 
 const port = process.env.PORT;
@@ -17,6 +18,8 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json({ limit: "50mb" }));
 
 const server = http.createServer(app);
+
+routes(app);
 
 server.listen(port, function () {
   console.log("App listening at http://localhost:" + port);
