@@ -174,7 +174,7 @@ class AuthService {
           body: `Talko - Ma OTP (thoi han ${OTP_EXPIRE_MINUTE} phut) xac nhan tai khoan  la: ${otp}`,
           // from: process.env.TWILIO_PHONE_NUMBER,
           from: "+15074317141",
-          to: "+840334225101",
+          to: "+84334225101",
         })
         .then((message) => console.log(message.sid))
         .catch((error) => console.error(error));
