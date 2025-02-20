@@ -3,10 +3,10 @@ const redisDb = require("../app/redis");
 
 // /me
 class MeController {
-  constructor(io) {
-    this.io = io;
-    this.revokeToken = this.revokeToken.bind(this);
-  }
+  // constructor(io) {
+  //   this.io = io;
+  //   this.revokeToken = this.revokeToken.bind(this);
+  // }
 
   // [GET] /profile
   async profile(req, res, next) {
@@ -22,6 +22,7 @@ class MeController {
 
       // res.json(await meService.getProfile(_id));
     } catch (err) {
+      console.log('err: ', err);
       next(err);
     }
   }
@@ -29,7 +30,7 @@ class MeController {
   // [PUT] /profile
   async updateProfile(req, res, next) {
     const { _id } = req;
-
+    
     try {
       await meService.updateProfile(_id, req.body);
       await redisDb.set(_id, await meService.getProfile(_id));

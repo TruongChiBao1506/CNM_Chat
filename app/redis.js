@@ -1,9 +1,13 @@
 const util = require("util");
 const redis = require("redis");
 // 6379
+// const client = redis.createClient({
+//   host: process.env.REDIS_HOST,
+//   port: process.env.REDIS_PORT,
+// });
+
 const client = redis.createClient({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 });
 
 client.on("connect", function () {
@@ -13,25 +17,43 @@ client.on("connect", function () {
 client.on("error", function (error) {
   console.error("Redis Error: ", error);
 });
-
-const setClient = util.promisify(client.set).bind(client);
-const getClient = util.promisify(client.get).bind(client);
-const existsClient = util.promisify(client.exists).bind(client);
-
+// Kết nối Redis
+(async () => {
+  try {
+    await client.connect();
+  } catch (error) {
+    console.error("Redis Connection Error:", error);
+  }
+})();
+// Hàm lưu dữ liệu vào Redis
 const set = async (key, value) => {
-  await setClient(key, JSON.stringify(value));
+  try {
+    await client.set(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Redis SET Error: ${error}`);
+  }
 };
 
+// Hàm lấy dữ liệu từ Redis
 const get = async (key) => {
-  const data = await getClient(key);
-
-  return JSON.parse(data);
+  try {
+    const data = await client.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error(`Redis GET Error: ${error}`);
+    return null;
+  }
 };
 
+// Hàm kiểm tra key có tồn tại trong Redis không
 const exists = async (key) => {
-  const isExists = await existsClient(key);
-
-  return isExists === 1;
+  try {
+    const isExists = await client.exists(key);
+    return isExists === 1;
+  } catch (error) {
+    console.error(`Redis EXISTS Error: ${error}`);
+    return false;
+  }
 };
 
 module.exports = {
