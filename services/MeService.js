@@ -1,7 +1,7 @@
 const MyError = require("../exception/MyError");
 const User = require("../models/User");
 const userValidate = require("../validate/userValidate");
-const awsS3Service = require("./AwsS3Service");
+// const awsS3Service = require("./AwsS3Service");
 const userService = require("./UserService");
 const authService = require("./AuthService");
 const messageValidate = require("../validate/messageValidate");

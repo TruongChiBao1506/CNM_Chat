@@ -11,6 +11,7 @@ class MeController {
   // [GET] /profile
   async profile(req, res, next) {
     const { _id } = req;
+    console.log("🚀 ~ MeController ~ profile ~ _id:", _id);
 
     try {
       const isExistsCached = await redisDb.exists(_id);
@@ -18,6 +19,8 @@ class MeController {
         await redisDb.set(_id, await meService.getProfile(_id));
 
       res.json(await redisDb.get(_id));
+
+      // res.json(await meService.getProfile(_id));
     } catch (err) {
       next(err);
     }
