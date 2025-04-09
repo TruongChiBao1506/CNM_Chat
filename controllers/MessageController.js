@@ -81,15 +81,16 @@ class MessageController {
       const { conversationId } = req.body;
       const message = await messageService.addText(req.body, _id);
       const { channelId } = message;
-
+      
       if (channelId) {
         this.io
           .to(conversationId + "")
           .emit("new-message-of-channel", conversationId, channelId, message);
-      } else
+      } else {
         this.io
-          .to(conversationId + "")
-          .emit("new-message", conversationId, message);
+        .to(conversationId + "")
+        .emit("new-message", conversationId, message);
+      }
 
       res.status(201).json(message);
     } catch (err) {
