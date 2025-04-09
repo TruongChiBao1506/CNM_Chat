@@ -9,8 +9,8 @@ const MyError = require("../exception/MyError");
 const User = require("../models/User");
 const conversationValidate = require("../validate/conversationValidate");
 const messageService = require("../services/MessageService");
-const awsS3Service = require("./AwsS3Service");
-const userService = require("./UserSevice");
+// const awsS3Service = require("./AwsS3Service");
+const userService = require("./UserService");
 const messageValidate = require("../validate/messageValidate");
 
 class ConversationService {
