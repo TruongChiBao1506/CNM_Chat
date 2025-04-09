@@ -1,5 +1,5 @@
 const router = require('express').Router();
-// const uploadFile = require('../middleware/uploadFile');
+const uploadFile = require('../middleware/uploadFile');
 const MessageController = require('../controllers/MessageController');
 
 const messageRouter = (io) => {
@@ -9,11 +9,11 @@ const messageRouter = (io) => {
     router.get('/channel/:channelId', messageController.getListByChannelId);
     router.post('/text', messageController.addText);
     router.get('/:conversationId/files', messageController.getListFiles);
-    // router.post(
-    //     '/files',
-    //     uploadFile.singleUploadMiddleware,
-    //     messageController.addFile
-    // );
+    router.post(
+        '/files',
+        uploadFile.singleUploadMiddleware,
+        messageController.addFile
+    );
     router.post('/files/base64', messageController.addFileWithBase64);
     router.delete('/:id', messageController.deleteById);
     router.delete('/:id/only', messageController.deleteOnlyMeById);
