@@ -156,7 +156,7 @@ class MessageService {
   }
 
   // send text
-  async addText(message, userId) {
+  async addText(message, userId) { 
     // validate
     await messageValidate.validateTextMessage(message, userId);
 
