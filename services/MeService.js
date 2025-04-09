@@ -1,7 +1,7 @@
 const MyError = require("../exception/MyError");
 const User = require("../models/User");
 const userValidate = require("../validate/userValidate");
-// const awsS3Service = require("./AwsS3Service");
+const awsS3Service = require("./AwsS3Service");
 const userService = require("./UserService");
 const authService = require("./AuthService");
 const messageValidate = require("../validate/messageValidate");
@@ -23,72 +23,72 @@ class MeService {
     await User.updateOne({ _id }, { ...profileWasValidate });
   }
 
-  // async changeAvatar(_id, file) {
-  //   this.checkImage(file);
+  async changeAvatar(_id, file) {
+    this.checkImage(file);
 
-  //   const user = await User.getById(_id);
-  //   const { avatar } = user;
-  //   if (avatar) await awsS3Service.deleteFile(avatar);
+    const user = await User.getById(_id);
+    const { avatar } = user;
+    if (avatar) await awsS3Service.deleteFile(avatar);
 
-  //   const avatarUrl = await awsS3Service.uploadFile(file);
-  //   await User.updateOne({ _id }, { avatar: avatarUrl });
+    const avatarUrl = await awsS3Service.uploadFile(file);
+    await User.updateOne({ _id }, { avatar: avatarUrl });
 
-  //   return avatarUrl;
-  // }
+    return avatarUrl;
+  }
 
-  // async changeCoverImage(_id, file) {
-  //   this.checkImage(file);
+  async changeCoverImage(_id, file) {
+    this.checkImage(file);
 
-  //   const user = await User.getById(_id);
-  //   const { coverImage } = user;
-  //   if (coverImage) await awsS3Service.deleteFile(coverImage);
+    const user = await User.getById(_id);
+    const { coverImage } = user;
+    if (coverImage) await awsS3Service.deleteFile(coverImage);
 
-  //   const coverImageUrl = await awsS3Service.uploadFile(file);
-  //   await User.updateOne({ _id }, { coverImage: coverImageUrl });
+    const coverImageUrl = await awsS3Service.uploadFile(file);
+    await User.updateOne({ _id }, { coverImage: coverImageUrl });
 
-  //   return coverImageUrl;
-  // }
+    return coverImageUrl;
+  }
 
-  // async changeAvatarWithBase64(_id, fileInfo) {
-  //   messageValidate.validateImageWithBase64(fileInfo);
+  async changeAvatarWithBase64(_id, fileInfo) {
+    messageValidate.validateImageWithBase64(fileInfo);
 
-  //   const user = await User.getById(_id);
-  //   const { avatar } = user;
-  //   if (avatar) await awsS3Service.deleteFile(avatar);
+    const user = await User.getById(_id);
+    const { avatar } = user;
+    if (avatar) await awsS3Service.deleteFile(avatar);
 
-  //   const { fileName, fileExtension, fileBase64 } = fileInfo;
-  //   const avatarUrl = await awsS3Service.uploadWithBase64(
-  //     fileBase64,
-  //     fileName,
-  //     fileExtension
-  //   );
-  //   await User.updateOne({ _id }, { avatar: avatarUrl });
+    const { fileName, fileExtension, fileBase64 } = fileInfo;
+    const avatarUrl = await awsS3Service.uploadWithBase64(
+      fileBase64,
+      fileName,
+      fileExtension
+    );
+    await User.updateOne({ _id }, { avatar: avatarUrl });
 
-  //   return avatarUrl;
-  // }
+    return avatarUrl;
+  }
 
-  // async changeCoverImageWithBase64(_id, fileInfo) {
-  //   messageValidate.validateImageWithBase64(fileInfo);
+  async changeCoverImageWithBase64(_id, fileInfo) {
+    messageValidate.validateImageWithBase64(fileInfo);
 
-  //   const user = await User.getById(_id);
-  //   const { coverImage } = user;
-  //   if (coverImage) await awsS3Service.deleteFile(coverImage);
+    const user = await User.getById(_id);
+    const { coverImage } = user;
+    if (coverImage) await awsS3Service.deleteFile(coverImage);
 
-  //   const { fileName, fileExtension, fileBase64 } = fileInfo;
-  //   const coverImageUrl = await awsS3Service.uploadWithBase64(
-  //     fileBase64,
-  //     fileName,
-  //     fileExtension
-  //   );
-  //   await User.updateOne({ _id }, { coverImage: coverImageUrl });
+    const { fileName, fileExtension, fileBase64 } = fileInfo;
+    const coverImageUrl = await awsS3Service.uploadWithBase64(
+      fileBase64,
+      fileName,
+      fileExtension
+    );
+    await User.updateOne({ _id }, { coverImage: coverImageUrl });
 
-  //   return coverImageUrl;
-  // }
+    return coverImageUrl;
+  }
 
   checkImage(file) {
     const { mimetype } = file;
 
-    if (mimetype !== "image/jpeg" && mimetype !== "image/png")
+    if (mimetype !== "image/jpeg" && mimetype !== "image/png" && mimetype !== "image/jpg")
       throw new MyError("Image invalid");
   }
 
