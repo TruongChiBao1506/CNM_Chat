@@ -38,10 +38,10 @@ const userValidate = {
     return true;
   },
 
-  // không được trống, 6 <= size <=50
+  // không được trống, 8 <= size <=50
   validatePassword: (password) => {
     if (!password) return false;
-    if (password.length < 6 || password.length > 50) return false;
+    if (password.length < 8 || password.length > 50) return false;
 
     return true;
   },
