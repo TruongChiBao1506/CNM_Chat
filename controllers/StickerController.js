@@ -3,10 +3,9 @@ const redisDb = require("../app/redis");
 
 class StickerController {
   async getAll(req, res, next) {
-    try {
+    try {  
       let stickers = await redisDb.get("stickers");
-
-      if (!stickers) {
+      if (!stickers || stickers.length === 0) {
         stickers = await stickerService.getAll();
         await redisDb.set("stickers", stickers);
       }
