@@ -7,7 +7,9 @@ const AWS_BUCKET_NAME_ADMIN = process.env.AWS_BUCKET_NAME_ADMIN;
 class StickerService {
   //  Lấy danh sách tất cả các nhóm nhãn dán.
   async getAll() {
-    return await Sticker.find({});
+    const stickers = await Sticker.find({});
+    if (!stickers) throw new NotFoundError("Sticker group");
+    return stickers;
   }
 
   // Tạo một nhóm nhãn dán mới.
