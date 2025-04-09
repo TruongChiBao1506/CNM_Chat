@@ -3,10 +3,10 @@ const redisDb = require("../app/redis");
 
 // /me
 class MeController {
-  // constructor(io) {
-  //   this.io = io;
-  //   this.revokeToken = this.revokeToken.bind(this);
-  // }
+  constructor(io) {
+    this.io = io;
+    this.revokeToken = this.revokeToken.bind(this);
+  }
 
   // [GET] /profile
   async profile(req, res, next) {
