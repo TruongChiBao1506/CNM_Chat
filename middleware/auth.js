@@ -25,7 +25,6 @@ const auth = async (req, res, next) => {
         }
 
         req._id = data._id;
-        console.log('User authenticated, proceeding to next middleware');
         next();
     } catch (error) {
         res.status(401).send({
