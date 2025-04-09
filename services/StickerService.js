@@ -1,7 +1,7 @@
 const Sticker = require("../models/Sticker");
 const NotFoundError = require("../exception/NotFoundError");
 const MyError = require("../exception/MyError");
-const awsS3Service = require("./AwsS3Service");
+// const awsS3Service = require("./AwsS3Service");
 const AWS_BUCKET_NAME_ADMIN = process.env.AWS_BUCKET_NAME_ADMIN;
 
 class StickerService {
