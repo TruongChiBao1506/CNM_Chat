@@ -2,8 +2,8 @@ const router = require("express").Router();
 const MeController = require("../controllers/MeController");
 // const uploadFile = require('../middleware/uploadFile');
 
-const meRouter = (io) => {
-  const meController = new MeController(io);
+const meRouter = () => {
+  const meController = new MeController();
 
   router.get("/profile", meController.profile);
   router.put("/profile", meController.updateProfile);

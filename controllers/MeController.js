@@ -9,9 +9,16 @@ class MeController {
   // }
 
   // [GET] /profile
+  
   async profile(req, res, next) {
+    // Log để debug
+    console.log("Request headers:", req.headers);
+    console.log("Request user ID:", req._id);
+
     const { _id } = req;
-    console.log("🚀 ~ MeController ~ profile ~ _id:", _id);
+    if (!_id) {
+      return res.status(401).json({ error: "Unauthorized - Missing user ID" });
+    }
 
     try {
       const isExistsCached = await redisDb.exists(_id);
@@ -22,7 +29,7 @@ class MeController {
 
       // res.json(await meService.getProfile(_id));
     } catch (err) {
-      console.log('err: ', err);
+      console.log("err: ", err);
       next(err);
     }
   }
@@ -30,7 +37,7 @@ class MeController {
   // [PUT] /profile
   async updateProfile(req, res, next) {
     const { _id } = req;
-    
+
     try {
       await meService.updateProfile(_id, req.body);
       await redisDb.set(_id, await meService.getProfile(_id));
