@@ -9,6 +9,7 @@ const commonUtils = require("../utils/commonUtils");
 const ArgumentError = require("../exception/ArgumentError");
 const messageUtils = require("../utils/messageUtils");
 const dateUtils = require("../utils/dateUtils");
+const awsS3Service = require("../services/AwsS3Service");
 const lastViewService = require("../services/LastViewService");
 
 class MessageService {
@@ -176,71 +177,71 @@ class MessageService {
   }
 
   // send file
-  // async addFile(file, type, conversationId, channelId, userId) {
-  //   await messageValidate.validateFileMessage(
-  //     file,
-  //     type,
-  //     conversationId,
-  //     channelId,
-  //     userId
-  //   );
+  async addFile(file, type, conversationId, channelId, userId) {
+    await messageValidate.validateFileMessage(
+      file,
+      type,
+      conversationId,
+      channelId,
+      userId
+    );
 
-  //   // upload ảnh
-  //   const content = await awsS3Service.uploadFile(file);
+    // upload ảnh
+    const content = await awsS3Service.uploadFile(file);
 
-  //   const newMessageTempt = {
-  //     userId,
-  //     content,
-  //     type,
-  //   };
+    const newMessageTempt = {
+      userId,
+      content,
+      type,
+    };
 
-  //   if (channelId) newMessageTempt.channelId = channelId;
-  //   else newMessageTempt.conversationId = conversationId;
+    if (channelId) newMessageTempt.channelId = channelId;
+    else newMessageTempt.conversationId = conversationId;
 
-  //   const newMessage = new Message({
-  //     ...newMessageTempt,
-  //   });
+    const newMessage = new Message({
+      ...newMessageTempt,
+    });
 
-  //   // lưu xuống
-  //   const saveMessage = await newMessage.save();
+    // lưu xuống
+    const saveMessage = await newMessage.save();
 
-  //   return this.updateWhenHasNewMessage(saveMessage, conversationId, userId);
-  // }
+    return this.updateWhenHasNewMessage(saveMessage, conversationId, userId);
+  }
 
   // send file base64
-  // async addFileWithBase64(fileInfo, type, conversationId, channelId, userId) {
-  //   await messageValidate.validateFileMessageWithBase64(
-  //     fileInfo,
-  //     type,
-  //     conversationId,
-  //     channelId,
-  //     userId
-  //   );
-  //   const { fileBase64, fileName, fileExtension } = fileInfo;
+  async addFileWithBase64(fileInfo, type, conversationId, channelId, userId) {
+    await messageValidate.validateFileMessageWithBase64(
+      fileInfo,
+      type,
+      conversationId,
+      channelId,
+      userId
+    );
+    const { fileBase64, fileName, fileExtension } = fileInfo;
 
-  //   // upload ảnh
-  //   const content = await awsS3Service.uploadWithBase64(
-  //     fileBase64,
-  //     fileName,
-  //     fileExtension
-  //   );
+    // upload ảnh
+    const content = await awsS3Service.uploadWithBase64(
+      fileBase64,
+      fileName,
+      fileExtension
+    );
 
-  //   const newMessageTempt = {
-  //     userId,
-  //     content,
-  //     type,
-  //   };
+    const newMessageTempt = {
+      userId,
+      content,
+      type,
+    };
 
-  //   if (channelId) newMessageTempt.channelId = channelId;
-  //   else newMessageTempt.conversationId = conversationId;
+    if (channelId) newMessageTempt.channelId = channelId;
+    else newMessageTempt.conversationId = conversationId;
 
-  //   const newMessage = new Message({
-  //     ...newMessageTempt,
-  //   });
-  //   const saveMessage = await newMessage.save();
+    const newMessage = new Message({
+      ...newMessageTempt,
+    });
+    const saveMessage = await newMessage.save();
 
-  //   return this.updateWhenHasNewMessage(saveMessage, conversationId, userId);
-  // }
+    return this.updateWhenHasNewMessage(saveMessage, conversationId, userId);
+  }
 
   /**
    *

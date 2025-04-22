@@ -9,7 +9,7 @@ class MeController {
   // }
 
   // [GET] /profile
-  
+
   async profile(req, res, next) {
     // Log để debug
     console.log("Request headers:", req.headers);

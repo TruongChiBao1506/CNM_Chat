@@ -51,30 +51,30 @@ class StickerService {
     await Sticker.deleteOne({ _id });
   }
 
-  // async addSticker(_id, file) {
-  //   const { mimetype } = file;
-  //   if (mimetype !== "image/jpeg" && mimetype !== "image/png")
-  //     throw new MyError("Image invalid");
+  async addSticker(_id, file) {
+    const { mimetype } = file;
+    if (mimetype !== "image/jpeg" && mimetype !== "image/png")
+      throw new MyError("Image invalid");
 
-  //   await Sticker.getById(_id);
+    await Sticker.getById(_id);
 
-  //   const url = await awsS3Service.uploadFile(file, AWS_BUCKET_NAME_ADMIN);
-  //   await Sticker.updateOne({ _id }, { $push: { stickers: url } });
+    const url = await awsS3Service.uploadFile(file, AWS_BUCKET_NAME_ADMIN);
+    await Sticker.updateOne({ _id }, { $push: { stickers: url } });
 
-  //   return url;
-  // }
+    return url;
+  }
 
-  // async deleteSticker(_id, url) {
-  //   const stickerGroup = await Sticker.getById(_id);
-  //   const { stickers } = stickerGroup;
+  async deleteSticker(_id, url) {
+    const stickerGroup = await Sticker.getById(_id);
+    const { stickers } = stickerGroup;
 
-  //   // tìm thấy
-  //   const index = stickers.findIndex((urlEle) => urlEle == url);
-  //   if (index === -1) throw new NotFoundError("Url sticker");
+    // tìm thấy
+    const index = stickers.findIndex((urlEle) => urlEle == url);
+    if (index === -1) throw new NotFoundError("Url sticker");
 
-  //   await awsS3Service.deleteFile(url, AWS_BUCKET_NAME_ADMIN);
-  //   await Sticker.updateOne({ _id }, { $pull: { stickers: url } });
-  // }
+    await awsS3Service.deleteFile(url, AWS_BUCKET_NAME_ADMIN);
+    await Sticker.updateOne({ _id }, { $pull: { stickers: url } });
+  }
 }
 
 module.exports = new StickerService();
