@@ -13,6 +13,7 @@ class MessageController {
     this.deleteById = this.deleteById.bind(this);
     this.addReaction = this.addReaction.bind(this);
     this.shareMessage = this.shareMessage.bind(this);
+    this.updateImageMessage = this.updateImageMessage.bind(this);
   }
 
   // [GET] /:conversationId
@@ -257,6 +258,37 @@ class MessageController {
         .to(conversationId + "")
         .emit("new-message", conversationId, message);
       res.status(201).json(message);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /:id/image
+  async updateImageMessage(req, res, next) {
+    const { _id } = req; // userId từ middleware xác thực
+    const { id } = req.params; // messageId từ URL
+    const { newImageUrl } = req.body; // URL mới của hình ảnh đã chỉnh sửa
+
+    try {
+      if (!newImageUrl) {
+        throw new MyError("New image URL is required");
+      }
+
+      const result = await messageService.updateImageMessage(
+        id,
+        newImageUrl,
+        _id
+      );
+
+      // Gửi thông báo qua socket.io để cập nhật UI của tất cả người dùng trong cuộc trò chuyện
+      this.io
+        .to(result.conversationId.toString())
+        .emit("update-message-image", result);
+
+      res.json({
+        success: true,
+        data: result,
+      });
     } catch (err) {
       next(err);
     }

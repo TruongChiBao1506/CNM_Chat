@@ -3,12 +3,10 @@ const tokenUtils = require("../utils/tokenUtils");
 
 const auth = async (req, res, next) => {
   const source = req.headers["user-agent"];
-  console.log("🚀 ~ auth ~ source:", source);
 
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
     const data = await tokenUtils.verifyToken(token);
-    console.log("🚀 ~ auth ~ data:", data);
 
     const user = await User.findOne({
       _id: data._id,
