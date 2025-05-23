@@ -170,6 +170,34 @@ const messageValidate = {
     )
       throw new MyError("Image extension invalid");
   },
+
+  validateMultipleImagesMessage: async (
+    files,
+    conversationId,
+    channelId,
+    userId
+  ) => {
+    if (!files || !Array.isArray(files) || files.length === 0)
+      throw new MyError("Files are required");
+      
+    // Check file types
+    for (const file of files) {
+      const { mimetype } = file;
+      if (
+        mimetype !== "image/jpeg" &&
+        mimetype !== "image/png" &&
+        mimetype !== "image/gif"
+      )
+        throw new MyError("All files must be images (jpeg, png, or gif)");
+    }
+
+    // check conversation exists
+    await Conversation.getByIdAndUserId(conversationId, userId);
+
+    // check channel if provided
+    if (channelId)
+      await Channel.getByIdAndConversationId(channelId, conversationId);
+  },
 };
 
 module.exports = messageValidate;

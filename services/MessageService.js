@@ -157,7 +157,7 @@ class MessageService {
   }
 
   // send text
-  async addText(message, userId) { 
+  async addText(message, userId) {
     // validate
     await messageValidate.validateTextMessage(message, userId);
 
@@ -238,6 +238,45 @@ class MessageService {
     const newMessage = new Message({
       ...newMessageTempt,
     });
+    const saveMessage = await newMessage.save();
+
+    return this.updateWhenHasNewMessage(saveMessage, conversationId, userId);
+  }
+
+  // send multiple images with optional text
+  async addMultipleImages(files, textContent, conversationId, channelId, userId) {
+    await messageValidate.validateMultipleImagesMessage(
+      files,
+      conversationId,
+      channelId,
+      userId
+    );
+
+    // Upload all images
+    const imageUrls = [];
+    for (const file of files) {
+      const imageUrl = await awsS3Service.uploadFile(file);
+      imageUrls.push(imageUrl);
+    }
+
+    // Create message
+    const newMessageData = {
+      userId,
+      content: JSON.stringify({
+        text: textContent || "",
+        images: imageUrls
+      }),
+      type: "MULTI_IMAGE",
+    };
+
+    if (channelId) newMessageData.channelId = channelId;
+    else newMessageData.conversationId = conversationId;
+
+    const newMessage = new Message({
+      ...newMessageData,
+    });
+
+    // Save message
     const saveMessage = await newMessage.save();
 
     return this.updateWhenHasNewMessage(saveMessage, conversationId, userId);
@@ -563,6 +602,55 @@ class MessageService {
     await Member.updateOne({ conversationId, userId }, { lastView: createdAt });
 
     return this.getById(_id, true);
+  }
+
+
+
+  /**
+   * Cập nhật nội dung tin nhắn hình ảnh
+   * @param {string} messageId - ID của tin nhắn cần cập nhật
+   * @param {string} newImageUrl - URL mới của hình ảnh đã chỉnh sửa
+   * @param {string} userId - ID của người dùng thực hiện cập nhật
+   * @returns {Object} - Thông tin tin nhắn đã cập nhật
+   */
+  async updateImageMessage(messageId, newImageUrl, userId) {
+    // Kiểm tra tin nhắn tồn tại
+    const message = await Message.getById(messageId);
+
+    // Kiểm tra quyền: chỉ người gửi tin nhắn mới có thể cập nhật
+    if (message.userId.toString() !== userId) {
+      throw new MyError("You don't have permission to update this message");
+    }
+
+    // Kiểm tra loại tin nhắn là IMAGE
+    if (message.type !== "IMAGE") {
+      throw new MyError("Only image messages can be updated with this method");
+    }
+
+    const currentTime = new Date();
+
+    // Cập nhật nội dung tin nhắn và thêm thời gian cập nhật
+    await Message.updateOne(
+      { _id: messageId },
+      {
+        content: newImageUrl,
+        updatedAt: currentTime, // Thêm thời gian cập nhật
+      }
+    );
+
+    // Trả về thông tin tin nhắn đã được cập nhật
+    const { conversationId, channelId } = message;
+    const conversation = await Conversation.findById(conversationId);
+
+    return {
+      _id: messageId,
+      conversationId,
+      channelId,
+      content: newImageUrl,
+      type: "IMAGE",
+      updatedAt: currentTime,
+      updatedMessage: await this.getById(messageId, conversation.type),
+    };
   }
 }
 

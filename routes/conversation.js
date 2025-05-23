@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const ConversationController = require('../controllers/ConversationController');
 const MemberController = require('../controllers/MemberController');
-// const uploadFile = require('../middleware/uploadFile');
+const uploadFile = require('../middleware/uploadFile');
 
 const conversationRouter = (io) => {
     const conversationController = new ConversationController(io);
@@ -19,11 +19,11 @@ const conversationRouter = (io) => {
     );
     router.post('/groups', conversationController.createGroupConversation);
     router.patch('/:id/name', conversationController.rename);
-    // router.patch(
-    //     '/:id/avatar',
-    //     uploadFile.singleUploadMiddleware,
-    //     conversationController.updateAvatar
-    // );
+    router.patch(
+        '/:id/avatar',
+        uploadFile.singleUploadMiddleware,
+        conversationController.updateAvatar
+    );
     // router.patch(
     //     '/:id/avatar/base64',
     //     conversationController.updateAvatarWithBase64

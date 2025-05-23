@@ -9,10 +9,47 @@ class MessageController {
     this.getListByChannelId = this.getListByChannelId.bind(this);
     this.addText = this.addText.bind(this);
     this.addFile = this.addFile.bind(this);
+    this.addMultipleImages = this.addMultipleImages.bind(this);
     this.addFileWithBase64 = this.addFileWithBase64.bind(this);
     this.deleteById = this.deleteById.bind(this);
+    this.deleteOnlyMeById = this.deleteOnlyMeById.bind(this);
     this.addReaction = this.addReaction.bind(this);
+    this.getListFiles = this.getListFiles.bind(this);
     this.shareMessage = this.shareMessage.bind(this);
+    this.updateImageMessage = this.updateImageMessage.bind(this);
+  }
+
+
+
+  // [PATCH] /:id/image
+  async updateImageMessage(req, res, next) {
+    const { _id } = req; // userId từ middleware xác thực
+    const { id } = req.params; // messageId từ URL
+    const { newImageUrl } = req.body; // URL mới của hình ảnh đã chỉnh sửa
+
+    try {
+      if (!newImageUrl) {
+        throw new MyError("New image URL is required");
+      }
+
+      const result = await messageService.updateImageMessage(
+        id,
+        newImageUrl,
+        _id
+      );
+
+      // Gửi thông báo qua socket.io để cập nhật UI của tất cả người dùng trong cuộc trò chuyện
+      this.io
+        .to(result.conversationId.toString())
+        .emit("update-message-image", result);
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
   // [GET] /:conversationId
@@ -81,15 +118,15 @@ class MessageController {
       const { conversationId } = req.body;
       const message = await messageService.addText(req.body, _id);
       const { channelId } = message;
-      
+
       if (channelId) {
         this.io
           .to(conversationId + "")
           .emit("new-message-of-channel", conversationId, channelId, message);
       } else {
         this.io
-        .to(conversationId + "")
-        .emit("new-message", conversationId, message);
+          .to(conversationId + "")
+          .emit("new-message", conversationId, message);
       }
 
       res.status(201).json(message);
@@ -110,6 +147,38 @@ class MessageController {
       const message = await messageService.addFile(
         file,
         type,
+        conversationId,
+        channelId,
+        _id
+      );
+
+      if (channelId) {
+        this.io
+          .to(conversationId + "")
+          .emit("new-message-of-channel", conversationId, channelId, message);
+      } else
+        this.io
+          .to(conversationId + "")
+          .emit("new-message", conversationId, message);
+
+      res.status(201).json(message);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  //[POST] /multi-images  tin nhắn dạng nhiều ảnh kèm text
+  async addMultipleImages(req, res, next) {
+    const { _id, files } = req;
+    const { conversationId, channelId, textContent } = req.query;
+
+    try {
+      if (!conversationId)
+        throw new MyError("Params conversationId not exists");
+
+      const message = await messageService.addMultipleImages(
+        files,
+        textContent,
         conversationId,
         channelId,
         _id

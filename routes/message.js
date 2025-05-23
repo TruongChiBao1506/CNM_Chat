@@ -14,11 +14,17 @@ const messageRouter = (io) => {
         uploadFile.singleUploadMiddleware,
         messageController.addFile
     );
+    router.post(
+        '/multi-images',
+        uploadFile.multipleUploadMiddleware,
+        messageController.addMultipleImages
+    );
     router.post('/files/base64', messageController.addFileWithBase64);
     router.delete('/:id', messageController.deleteById);
     router.delete('/:id/only', messageController.deleteOnlyMeById);
     router.post('/:id/reacts/:type', messageController.addReaction);
     router.post('/:id/share/:conversationId', messageController.shareMessage);
+    router.patch("/:id/image", messageController.updateImageMessage);
 
     return router;
 };

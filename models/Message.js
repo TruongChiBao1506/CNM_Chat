@@ -29,6 +29,7 @@ const messageSchema = new Schema(
       enum: [
         "TEXT",
         "IMAGE",
+        "MULTI_IMAGE",
         "STICKER",
         "VIDEO",
         "FILE",
