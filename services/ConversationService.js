@@ -104,6 +104,11 @@ class ConversationService {
       managerIds,
     } = conversation;
 
+    let membersInfo = null;
+    if (type) { // Group conversation
+      membersInfo = await this.getMembersWithUserInfo(_id);
+    }
+
     // Lấy tin nhắn cuối cùng (nếu có)
     const lastMessage = lastMessageId
       ? await messageService.getById(lastMessageId, type)
@@ -147,6 +152,8 @@ class ConversationService {
       ...nameAndAvatarInfo,
       type,
       totalMembers: members.length,
+      members: membersInfo,
+      memberIds: members,
       numberUnread,
       leaderId,
       managerIds,
@@ -154,6 +161,38 @@ class ConversationService {
       isNotify,
       isJoinFromLink,
     };
+  }
+  async getMembersWithUserInfo(conversationId) {
+    const membersWithUserInfo = await Member.aggregate([
+      {
+        $match: {
+          conversationId: ObjectId(conversationId)
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userInfo"
+        }
+      },
+      {
+        $unwind: "$userInfo"
+      },
+      {
+        $project: {
+          _id: "$userInfo._id",
+          name: "$userInfo.name",
+          avatar: "$userInfo.avatar",
+          avatarColor: "$userInfo.avatarColor",
+          isOnline: "$userInfo.isOnline", // Optional
+          userId: "$userId" // Keep original userId reference
+        }
+      }
+    ]);
+
+    return membersWithUserInfo;
   }
 
   /**

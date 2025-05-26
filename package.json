@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^0.9.0",
+    "agora-access-token": "^2.0.4",
     "aws-sdk": "^2.987.0",
     "axios": "^0.23.0",
     "bcryptjs": "^2.4.3",

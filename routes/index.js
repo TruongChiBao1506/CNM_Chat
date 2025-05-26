@@ -3,6 +3,8 @@ const userRouter = require('./user');
 const classifyRouter = require('./classify');
 const auth = require("../middleware/auth");
 const stickerRouter = require('./sticker');
+const tokenRoutes = require('./agora');
+
 
 const route = (app,io) => {
   const meRouter = require("./me")(io);
@@ -23,6 +25,7 @@ const route = (app,io) => {
   app.use('/pin-messages', auth, pinMessageRouter);
   app.use('/votes', auth, voteRouter);
   app.use('/stickers', auth, stickerRouter);
+  app.use('/api', tokenRoutes);
 };
 
 module.exports = route;
