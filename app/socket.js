@@ -440,28 +440,28 @@ const socket = (io) => {
             }
         );
 
-        socket.on(
-            'subscribe-call-video',
-            ({ conversationId, newUserId, userName, userAvatar }) => {
-                // Log để debug
-                console.log('📹 VIDEO CALL REQUEST received:', {
-                    conversationId, newUserId, userName, userAvatar
-                });
+        // socket.on(
+        //     'subscribe-call-video',
+        //     ({ conversationId, newUserId, userName, userAvatar }) => {
+        //         // Log để debug
+        //         console.log('📹 VIDEO CALL REQUEST received:', {
+        //             conversationId, newUserId, userName, userAvatar
+        //         });
 
-                // Broadcast đến TOÀN BỘ phòng conversation, không phải phòng khác
-                socket.broadcast
-                    .to(conversationId) // Sửa ở đây: gửi đến conversation ID gốc
-                    .emit('new-user-call', {
-                        conversationId,
-                        newUserId,
-                        userName,
-                        userAvatar,
-                        peerId: newUserId
-                    });
+        //         // Broadcast đến TOÀN BỘ phòng conversation, không phải phòng khác
+        //         socket.broadcast
+        //             .to(conversationId) // Sửa ở đây: gửi đến conversation ID gốc
+        //             .emit('new-user-call', {
+        //                 conversationId,
+        //                 newUserId,
+        //                 userName,
+        //                 userAvatar,
+        //                 peerId: newUserId
+        //             });
 
-                console.log('📢 Đã broadcast new-user-call đến phòng:', conversationId);
-            }
-        );
+        //         console.log('📢 Đã broadcast new-user-call đến phòng:', conversationId);
+        //     }
+        // );
 
         // THÊM: Xử lý từ chối cuộc gọi thoại
         socket.on('reject-voice-call', ({ conversationId, rejectedBy }) => {
@@ -479,19 +479,19 @@ const socket = (io) => {
         });
 
         // THÊM: Xử lý từ chối cuộc gọi video
-        socket.on('reject-video-call', ({ conversationId, rejectedBy }) => {
-            console.log('❌ VIDEO CALL REJECTED:', { conversationId, rejectedBy });
+        // socket.on('reject-video-call', ({ conversationId, rejectedBy }) => {
+        //     console.log('❌ VIDEO CALL REJECTED:', { conversationId, rejectedBy });
 
-            // Gửi thông báo từ chối đến tất cả members trong conversation
-            socket.broadcast
-                .to(conversationId)
-                .emit('video-call-rejected', {
-                    conversationId,
-                    rejectedBy
-                });
+        //     // Gửi thông báo từ chối đến tất cả members trong conversation
+        //     socket.broadcast
+        //         .to(conversationId)
+        //         .emit('video-call-rejected', {
+        //             conversationId,
+        //             rejectedBy
+        //         });
 
-            console.log('📢 Đã broadcast video-call-rejected đến phòng:', conversationId);
-        });
+        //     console.log('📢 Đã broadcast video-call-rejected đến phòng:', conversationId);
+        // });
 
         socket.on('join-call', ({ conversationId, userId }) => {
             console.log('User joined call:', userId, 'in conversation:', conversationId);
@@ -635,6 +635,135 @@ const socket = (io) => {
             });
 
             console.log('📢 Broadcasted call-answered-notification to room:', conversationId);
+        });
+        socket.on(
+            'subscribe-call-video',
+            ({ conversationId, newUserId, userName, userAvatar, isGroupCall }) => {
+                console.log('📹 VIDEO CALL REQUEST received:', {
+                    conversationId, newUserId, userName, userAvatar, isGroupCall
+                });
+
+                // ✅ CRITICAL: Emit incoming-video-call thay vì new-user-call
+                socket.broadcast
+                    .to(conversationId)
+                    .emit('incoming-video-call', {
+                        conversationId,
+                        caller: {
+                            userId: newUserId,
+                            name: userName,
+                            avatar: userAvatar
+                        },
+                        isGroupCall: isGroupCall || false
+                    });
+
+                console.log('📢 Đã broadcast incoming-video-call đến phòng:', conversationId);
+            }
+        );
+
+        // ✅ SEPARATE: Video call rejection
+        socket.on('reject-video-call', ({ conversationId, rejectedBy }) => {
+            console.log('❌ VIDEO CALL REJECTED:', { conversationId, rejectedBy });
+
+            socket.broadcast
+                .to(conversationId)
+                .emit('video-call-rejected', {
+                    conversationId,
+                    rejectedBy
+                });
+
+            console.log('📢 Đã broadcast video-call-rejected đến phòng:', conversationId);
+        });
+
+        // ✅ CRITICAL: Video call cancellation
+        socket.on('cancel-video-call', ({ conversationId, callerInfo, reason }) => {
+            console.log('🚫 VIDEO CALL CANCELLED by caller:', { conversationId, callerInfo });
+
+            socket.broadcast
+                .to(conversationId)
+                .emit('video-call-cancelled', {
+                    conversationId,
+                    callerInfo,
+                    reason
+                });
+
+            console.log('📢 Đã broadcast video-call-cancelled đến phòng:', conversationId);
+        });
+
+        // ✅ CRITICAL: Video call answered notification
+        socket.on('video-call-answered-notification', ({ conversationId, answeredBy, isGroupCall, userId }) => {
+            console.log('📹 Video call answered notification:', { conversationId, answeredBy, isGroupCall, userId });
+
+            socket.broadcast.to(conversationId).emit('video-call-answered-notification', {
+                conversationId,
+                answeredBy,
+                isGroupCall,
+                userId,
+                timestamp: new Date()
+            });
+
+            console.log('📢 Broadcasted video-call-answered-notification to room:', conversationId);
+        });
+
+        // ✅ SEPARATE: Video call participants (for group calls)
+        socket.on('user-joined-video-channel', ({ conversationId, userId, agoraUid, userName, userAvatar }) => {
+            console.log('👤 User joined video channel:', { conversationId, userId, agoraUid });
+
+            // Track participant for video group calls
+            if (!groupCallParticipants.has(`video_${conversationId}`)) {
+                groupCallParticipants.set(`video_${conversationId}`, new Map());
+            }
+
+            const participants = groupCallParticipants.get(`video_${conversationId}`);
+            participants.set(userId, {
+                userId,
+                agoraUid,
+                userName: userName || `User ${userId}`,
+                userAvatar: userAvatar || null,
+                joinedAt: new Date()
+            });
+
+            const participantsList = Array.from(participants.values());
+
+            socket.broadcast.to(conversationId).emit('video-call-participants-updated', {
+                conversationId,
+                participants: participantsList,
+                newParticipant: {
+                    userId,
+                    agoraUid,
+                    userName: userName || `User ${userId}`,
+                    userAvatar
+                }
+            });
+
+            socket.emit('video-call-participants-updated', {
+                conversationId,
+                participants: participantsList,
+                newParticipant: null
+            });
+
+            console.log('📢 Broadcasted video-call-participants-updated:', participantsList.length, 'participants');
+        });
+
+        socket.on('user-left-video-channel', ({ conversationId, userId, agoraUid }) => {
+            console.log('👋 User left video channel:', { conversationId, userId, agoraUid });
+
+            if (groupCallParticipants.has(`video_${conversationId}`)) {
+                const participants = groupCallParticipants.get(`video_${conversationId}`);
+                participants.delete(userId);
+
+                if (participants.size === 0) {
+                    groupCallParticipants.delete(`video_${conversationId}`);
+                }
+
+                const participantsList = Array.from(participants.values());
+                io.to(conversationId).emit('video-call-participants-updated', {
+                    conversationId,
+                    participants: participantsList,
+                    leftParticipant: { userId, agoraUid }
+                });
+
+                console.log('📢 Broadcasted video participant left:', participantsList.length, 'remaining');
+            }
         });
     }); // <-- closes io.on('connect', ...)
 };
