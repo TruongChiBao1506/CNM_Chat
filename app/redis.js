@@ -7,7 +7,8 @@ const redis = require("redis");
 // });
 
 const client = redis.createClient({
-  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  // url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  url: `${process.env.REDIS_URL}`,
 });
 
 client.on("connect", function () {
