@@ -539,7 +539,8 @@ const socket = (io) => {
                 .emit('video-call-cancelled', {
                     conversationId,
                     callerInfo,
-                    reason
+                    reason,
+                    timestamp: Date.now()
                 });
 
             console.log('📢 Đã broadcast video-call-cancelled đến phòng:', conversationId);
@@ -743,6 +744,20 @@ const socket = (io) => {
 
             console.log('📢 Broadcasted video-call-participants-updated:', participantsList.length, 'participants');
         });
+        socket.on('user-left-group-voice-call', ({ conversationId, leftUser, reason }) => {
+            console.log('👋 USER LEFT GROUP VOICE CALL:', { conversationId, leftUser, reason });
+
+            socket.broadcast
+                .to(conversationId)
+                .emit('user-left-group-voice-call', {
+                    conversationId,
+                    leftUser,
+                    reason: reason || 'user_left',
+                    timestamp: Date.now()
+                });
+
+            console.log('📢 Broadcasted user-left-group-voice-call to room:', conversationId);
+        });
 
         socket.on('user-left-video-channel', ({ conversationId, userId, agoraUid }) => {
             console.log('👋 User left video channel:', { conversationId, userId, agoraUid });
@@ -764,6 +779,21 @@ const socket = (io) => {
 
                 console.log('📢 Broadcasted video participant left:', participantsList.length, 'remaining');
             }
+        });
+        socket.on('user-left-group-video-call', ({ conversationId, leftUser, reason }) => {
+            console.log('👋 USER LEFT GROUP VIDEO CALL:', { conversationId, leftUser, reason });
+
+            // ✅ BROADCAST to other participants in the group call
+            socket.broadcast
+                .to(conversationId)
+                .emit('user-left-group-video-call', {
+                    conversationId,
+                    leftUser,
+                    reason: reason || 'user_left',
+                    timestamp: Date.now()
+                });
+
+            console.log('📢 Broadcasted user-left-group-video-call to room:', conversationId);
         });
     }); // <-- closes io.on('connect', ...)
 };
